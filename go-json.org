@@ -2,7 +2,7 @@
 ** Setup
 *** Pre-requisites
 #+BEGIN_EXAMPLE
-elpa packages installed: dockerfile-mode, go-mode, yaml-mode
+elpa packages installed: go-mode
 ~/emacs.d/init.el customizations: 
 - load babel languages: sh
 - configure for golang development (goimports on save, go oracle)
@@ -124,8 +124,6 @@ go tool vet src
 
 #+RESULTS: build-run-go
 : building and running locally...
-: command-line-arguments
-: command-line-arguments
 : unmarshal JSON s1={sample1 bar 0}
 : unmarshal s2array=[{sample2item1 foo 1} {sample2item2 bar 2} {sample2item3 bat 3}]
 : marshal Sample:{"name":"foo","xid":"42"}

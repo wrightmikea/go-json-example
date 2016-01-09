@@ -21,3 +21,7 @@ exporting html
 ===
 1. edit go-json.org
 2. export to go-json.html: "C-c C-E h o y"
+
+generated html
+===
+Browse [sample output](http://wrightmikea.github.io/go-json-example.html "exported html")

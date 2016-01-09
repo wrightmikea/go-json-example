@@ -109,16 +109,16 @@ func main() {
 #+BEGIN_SRC sh :exports both :results verbatim replace
 exec 2>&1 
 echo building and running locally...
-rm ./unmarsh
-rm ./marsh
+rm -rf ./bin 2>&1 > /dev/null
+mkdir -p ./bin
 export GOPATH=`pwd`/..
 export MARSH=src/gojson/marsh/main/marsh.go
 export UNMARSH=src/gojson/unmarsh/main/unmarsh.go
-go build -v $MARSH 
-go build -v $UNMARSH 
+go build -o ./bin/marsh $MARSH 
+go build -o ./bin/unmarsh $UNMARSH 
 go tool vet src
-./unmarsh src/sample1.json src/sample2.json 
-./marsh
+./bin/unmarsh src/sample1.json src/sample2.json 
+./bin/marsh
 :
 #+END_SRC
 

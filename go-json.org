@@ -1,0 +1,133 @@
+* Go examples JSON marshalling/unmarshalling
+** Setup
+*** Pre-requisites
+#+BEGIN_EXAMPLE
+elpa packages installed: dockerfile-mode, go-mode, yaml-mode
+~/emacs.d/init.el customizations: 
+- load babel languages: sh
+- configure for golang development (goimports on save, go oracle)
+#+END_EXAMPLE
+*** Sample JSON data
+sample1.json
+#+name: sample1-json
+#+BEGIN_SRC js :eval no :exports code :padline no :tangle src/sample1.json
+{ "name":"sample1", "foo":"bar", "bat":42}
+#+END_SRC
+sample2.json
+#+name: sample2-json
+#+BEGIN_SRC js :eval no :exports code :padline no :tangle src/sample2.json
+[
+    { "name":"sample2item1", "alias":"foo", "xid":1},
+    { "name":"sample2item2", "alias":"bar", "xid":2},
+    { "name":"sample2item3", "alias":"bat", "xid":3}
+]
+#+END_SRC
+#+name: create-dirs-for-tangled-code
+#+BEGIN_SRC sh :exports none 
+mkdir -p src/gojson/marsh/main 2>&1 > /dev/null
+mkdir -p src/gojson/unmarsh/main 2>&1 > /dev/null
+#+END_SRC
+
+#+RESULTS: create-dirs-for-tangled-code
+
+** Go JSON examples
+*** Unmarshalling JSON
+src/gojson/unmarsh/main/unmarsh.go
+#+name: unmarsh-go
+#+BEGIN_SRC go :eval no :exports code :tangle src/gojson/unmarsh/main/unmarsh.go
+package main
+
+import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
+        "os"
+)
+
+type Sample1 struct {
+	Name string `json:"name"`
+	Foo  string `json:"foo"`
+	Xid  int    `json:"xid"`
+}
+type Sample2 struct {
+       Name string  `json:"name"`
+       Alias string `json:"alias"`
+       Xid   int    `json:"xid"`
+}
+func main() {
+        if len(os.Args) != 3 {
+              fmt.Println("usage > ./unmarsh src/sample1.json src/sample2.json")
+              return
+        }
+	s1s, _ := ioutil.ReadFile(os.Args[1])
+	dec1 := json.NewDecoder(bytes.NewReader(s1s))
+	var s1 Sample1
+	dec1.Decode(&s1)
+	fmt.Printf("unmarshal JSON s1=%v\n", s1)
+        s2s, _ := ioutil.ReadFile(os.Args[2])
+        dec2 := json.NewDecoder(bytes.NewReader(s2s))
+        var s2array []Sample2
+        dec2.Decode(&s2array)
+        fmt.Printf("unmarshal s2array=%v\n", s2array)
+}
+
+#+END_SRC
+*** Marshalling JSON
+src/gojson/marsh/main/marsh.go
+#+name: marsh-go
+#+BEGIN_SRC go :eval no :exports code :tangle src/gojson/marsh/main/marsh.go
+package main
+
+import (
+	"encoding/json"
+	"fmt"
+)
+
+type Sample struct {
+	Name string `json:"name"`
+	Xid  string `json:"xid"`
+}
+
+func main() {
+	var aSample Sample
+	aSample.Name = "foo"
+	aSample.Xid = "42"
+        s, _ := json.Marshal(aSample)
+	fmt.Printf("marshal Sample:%s\n", string(s))
+        var sAry = make([]Sample, 2)
+        sAry[0].Name = "one"
+        sAry[0].Xid = "1"
+        sAry[1].Name = "two"
+        sAry[1].Xid = "2"
+        s, _ = json.Marshal(sAry)
+        fmt.Printf("marshal sAry:%s\n", string(s))
+}
+
+#+END_SRC
+#+name: build-run-go
+#+BEGIN_SRC sh :exports both :results verbatim replace
+exec 2>&1 
+echo building and running locally...
+rm ./unmarsh
+rm ./marsh
+export GOPATH=`pwd`/..
+export MARSH=src/gojson/marsh/main/marsh.go
+export UNMARSH=src/gojson/unmarsh/main/unmarsh.go
+go build -v $MARSH 
+go build -v $UNMARSH 
+go tool vet src
+./unmarsh src/sample1.json src/sample2.json 
+./marsh
+:
+#+END_SRC
+
+#+RESULTS: build-run-go
+: building and running locally...
+: command-line-arguments
+: command-line-arguments
+: unmarshal JSON s1={sample1 bar 0}
+: unmarshal s2array=[{sample2item1 foo 1} {sample2item2 bar 2} {sample2item3 bat 3}]
+: marshal Sample:{"name":"foo","xid":"42"}
+: marshal sAry:[{"name":"one","xid":"1"},{"name":"two","xid":"2"}]
+

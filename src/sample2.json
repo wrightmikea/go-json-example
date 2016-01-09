@@ -1,0 +1,5 @@
+[
+    { "name":"sample2item1", "alias":"foo", "xid":1},
+    { "name":"sample2item2", "alias":"bar", "xid":2},
+    { "name":"sample2item3", "alias":"bat", "xid":3}
+]
